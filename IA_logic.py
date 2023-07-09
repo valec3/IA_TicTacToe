@@ -1,20 +1,27 @@
-class Ia_logic:
+import sys
+import random
+import numpy as np 
+from minimax import minimax
+class IA:
     """Clase para manejar la logica de la IA del juego
     """
-    def __init__(self,player=2,level = 0):
+    def __init__(self,player=2,level = 1):
         self.player=player
         self.level = level
-    def move_rnd(self,board):
-        cuad_vacio = board.get_empty()
-    def eval(self,main_board):
+    def move_rnd(self,cuad_vacio):
+        if len(cuad_vacio) > 1:
+            idx = random.randrange(0,len(cuad_vacio))
+            return cuad_vacio[idx]
+        
+    def eval(self,board_empty,board):
         """Jugar segun el modo de dificultad
 
         Args:
-            main_board (_type_): _description_
+            board (_type_): _description_
         """
         if self.level == 0:
             # Modo aleatorio 
-            pass
+            return self.move_rnd(board_empty)
         else:
             # minimax
-            pass
+            print( minimax(board,board_empty,False))

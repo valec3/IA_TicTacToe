@@ -3,6 +3,7 @@ import pygame
 import sys
 import numpy as np
 from config import Configuraciones
+from IA_logic import IA
 class Game:
     def __init__(self) -> None:
         """Inicializa el juego y crea los recursos del juego."""
@@ -15,10 +16,11 @@ class Game:
         self.ventana = pygame.display.set_mode(
             (self.config.ventana_width,self.config.ventana_height)
         )
-        
+        self.ai=IA()
         self.player_current= 1
         self.cells=np.zeros((3,3))
         self.cells_emp=self.cells
+        self.played = 0
         self.comb_wins= [
                         [0, 1, 2],
                         [3, 4, 5],
@@ -29,13 +31,14 @@ class Game:
                         [0, 4, 8],
                         [2, 4, 6]
                         ]
-        
+        self.game_mode= "ai"
+        self.game_over = False
     def show_board(self):
         """Dibuja el tablero 3x3
         """
         # Dibujar fondo del tablero
         pygame.draw.rect(self.ventana,
-                        (255, 82, 82),
+                        (119, 136, 153),
                         (self.config.board_lx,self.config.board_ty,self.config.board_sz_w,self.config.board_sz_w))
         
         # Dibujar lineas
@@ -53,7 +56,15 @@ class Game:
                             ,7)
         
     def add_go(self,player,row,col):
+        """Agrega las fichas segun el jugador
+
+        Args:
+            player (int): numero de jugador
+            row (int): nmr de fila
+            col (int): nmr de columna
+        """
         self.cells[row][col]=player
+        self.played += 1
         self.change_turn()
         
     def draw_goes(self):
@@ -86,6 +97,24 @@ class Game:
                     )
     def empty_cell(self,row,col):
         return self.cells[row][col] == 0
+    def is_full_board(self):
+        return self.played == 9 #true si esta lleno 
+    def get_empty_cell(self):
+        empty_cells = [ [r,c] for r in range(3) 
+                        for c in range(3) if self.empty_cell(r,c)]
+        return empty_cells
+    def game_final(self):
+        for c in range(3):
+            if self.cells[0][c] == self.cells[1][c] == self.cells[2][c] != 0:
+                return self.cells[0][c]
+        for r in range(3):
+            if self.cells[r][0] == self.cells[r][1] == self.cells[r][2] != 0:
+                return self.cells[r][0]
+        if self.cells[0][0] == self.cells[1][1] == self.cells[2][2] != 0:
+            return self.cells[0][0]
+        if self.cells[2][0] == self.cells[1][1] == self.cells[0][2] != 0:
+            return self.cells[2][0]
+        return 0
     def change_turn(self):
         self.player_current = self.player_current % 2 + 1
     def actualizar_ventana(self):
@@ -120,6 +149,12 @@ class Game:
         while not self.game_active:
             self.actualizar_ventana()
             self.revisar_eventos()
+            if (self.game_mode == "ai" and self.player_current == self.ai.player) and self.get_empty_cell() != []:
+                pygame.display.update()
+                row,col = self.ai.eval(self.get_empty_cell(),self.cells)
+                self.add_go(self.ai.player,row,col)
+                
+            print(self.cells)
             self.clock.tick(60) #FPS
     
     
