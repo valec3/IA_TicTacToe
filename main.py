@@ -22,8 +22,10 @@ class Game:
         self.player_current= -1
         self.game_mode= "ai"
         self.game_over = False
-        self.btn_pvr = pygame.Rect(415, 253, 330, 100)
+        self.game_winner=False
+        self.btn_pvp = pygame.Rect(415, 253, 330, 100)
         self.btn_pvc = pygame.Rect(415, 353, 330, 100)
+        self.btn_conf = pygame.Rect(415, 453, 330, 100)
     def show_board(self):
         """Dibuja el tablero cuadriculado 3x3
         """
@@ -82,6 +84,8 @@ class Game:
         row,col = self.ai.eval(self.board)
         self.board.add_go(self.ai.player,row,col)
         self.change_turn()
+    def state_game(self):
+        return self.board.is_full_board() or self.board.final_state() != 0
     def checked_play_button(self,pos_mouse):
         """Inicia un nuevo juego cuando se hace click en algun boton."""
         if self.game_active == False:
@@ -91,11 +95,10 @@ class Game:
                 self.ai.level=1
                 print("modo ia")
                 print(self.game_active)
-                # self.board.cells=[[0,0,0],[0,0,0],[0,0,0]]
-            elif  self.btn_pvr.collidepoint(pos_mouse):
-                print("modo rnd")
+            elif  self.btn_pvp.collidepoint(pos_mouse):
+                print("modo pvp")
                 self.game_active =True
-                self.game_mode = "ai"
+                self.game_mode = "pvp"
                 self.ai.level=0
     def show_menu(self):
         pass
@@ -114,7 +117,17 @@ class Game:
             
         #Actualizar pantalla
         pygame.display.flip()
-        
+    def revisar_eventos_mouse(self,pos):
+        if self.game_active:
+            row=int((pos[1] - self.config.board_ty)// self.config.sqr_size)
+            col=int((pos[0] - self.config.board_lx) // self.config.sqr_size)
+            print(row,col)
+            if row in(0,1,2) and col in(0,1,2) and  self.board.empty_cell(row,col) and self.board.final_state()==0:
+                self.board.add_go(self.player_current,row,col)
+                self.change_turn()
+                print(self.board.played)
+        self.checked_play_button(pos)
+                    
     def revisar_eventos(self):
         for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
@@ -128,18 +141,11 @@ class Game:
                         self.game_active = False
                         self.board.cells = [[0,0,0],[0,0,0],[0,0,0]]
                         self.player_current=-1
+                        self.board.played=0
                 if evento.type == pygame.MOUSEBUTTONDOWN:
                     pos=evento.pos
                     print(pos)
-                    
-                    if self.game_active:
-                        row=int((pos[1] - self.config.board_ty)// self.config.sqr_size)
-                        col=int((pos[0] - self.config.board_lx) // self.config.sqr_size)
-                        print(row,col)
-                        if row in(0,1,2) and col in(0,1,2) and  self.board.empty_cell(row,col) :
-                            self.board.add_go(self.player_current,row,col)
-                            self.change_turn()
-                    self.checked_play_button(pos)
+                    self.revisar_eventos_mouse(pos)
                     
     def run_game(self):
         # Bucle principal del juego
@@ -147,8 +153,16 @@ class Game:
         while not self.game_over:
             self.actualizar_ventana()
             self.revisar_eventos()
+            if self.state_game() and self.game_active:
+                self.ventana.blit(self.config.winner_box,((1200-50)//2,(800-50)//2))
+                # self.game_active=False
+                self.board.cells = [[0,0,0],[0,0,0],[0,0,0]]
+                self.board.played=0
+                self.player_current=-1
+                print("PLAYER  WINNER:",-self.player_current)
             if (self.game_mode == "ai" and self.player_current == 1) and self.board.get_empty_cell()!=[]:
                 self.ia_move()
+                
             self.clock.tick(60) #FPS
     
     
