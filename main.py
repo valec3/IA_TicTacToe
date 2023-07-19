@@ -23,9 +23,14 @@ class Game:
         self.game_mode= "ai"
         self.game_over = False
         self.game_winner=False
+        # Botones menu
         self.btn_pvp = pygame.Rect(415, 253, 330, 100)
         self.btn_pvc = pygame.Rect(415, 353, 330, 100)
         self.btn_conf = pygame.Rect(415, 453, 330, 100)
+        # botones box question
+        self.btn_vaj = pygame.Rect(365, 365, 200, 50)
+        self.btn_vam = pygame.Rect(620, 365, 200, 50)
+        
     def show_board(self):
         """Dibuja el tablero cuadriculado 3x3
         """
@@ -86,6 +91,15 @@ class Game:
         self.change_turn()
     def state_game(self):
         return self.board.is_full_board() or self.board.final_state() != 0
+    def show_winner_message(self):
+        player_win = ("Jugador 1" if self.player_current == 1 else "Jugador 2")
+        texto_show = "¡El ganador es el " + player_win + "!"
+        if self.board.final_state()==0:
+            texto_show = "Empate"
+        font = pygame.font.SysFont(None, 48)
+        text = font.render(texto_show, True, (255,255,255))
+        text_rect = text.get_rect(center=(1200 // 2, 320))
+        self.ventana.blit(text, text_rect)
     def checked_play_button(self,pos_mouse):
         """Inicia un nuevo juego cuando se hace click en algun boton."""
         if self.game_active == False:
@@ -100,8 +114,21 @@ class Game:
                 self.game_active =True
                 self.game_mode = "pvp"
                 self.ai.level=0
-    def show_menu(self):
-        pass
+                
+        if self.game_active == "stop":
+            
+            if self.btn_vam.collidepoint(pos_mouse):
+                print("volver al menu")
+                self.game_active=False
+                self.board.cells = [[0,0,0],[0,0,0],[0,0,0]]
+                self.board.played=0
+                self.player_current=-1
+            elif  self.btn_vaj.collidepoint(pos_mouse):                
+                print("volver a jugar")
+                self.game_active=True
+                self.board.cells = [[0,0,0],[0,0,0],[0,0,0]]
+                self.board.played=0
+                self.player_current=-1
     def actualizar_ventana(self):
         """Actualizar imagenes en la ventana y mostrar ventana actual."""
         
@@ -114,7 +141,11 @@ class Game:
             self.ventana.blit(self.config.bg_imagen,(0,0))
             self.show_board()
             self.draw_goes()
-            
+        
+        if self.game_active == "stop":
+            pygame.time.delay(200)
+            self.ventana.blit(self.config.question_bx,(300,250))
+            self.show_winner_message()
         #Actualizar pantalla
         pygame.display.flip()
     def revisar_eventos_mouse(self,pos):
@@ -153,17 +184,14 @@ class Game:
         while not self.game_over:
             self.actualizar_ventana()
             self.revisar_eventos()
-            if self.state_game() and self.game_active:
-                self.ventana.blit(self.config.winner_box,((1200-50)//2,(800-50)//2))
-                # self.game_active=False
-                self.board.cells = [[0,0,0],[0,0,0],[0,0,0]]
-                self.board.played=0
-                self.player_current=-1
-                print("PLAYER  WINNER:",-self.player_current)
             if (self.game_mode == "ai" and self.player_current == 1) and self.board.get_empty_cell()!=[]:
                 self.ia_move()
+            if self.state_game() and self.game_active:
+                self.game_active = "stop"
+                # print("PLAYER  WINNER:",-self.player_current)
                 
             self.clock.tick(60) #FPS
+            
     
     
 Tictactoe = Game()

@@ -1,15 +1,17 @@
 import pygame
 
 class Configuraciones:
-    winner_box = pygame.image.load('img/winner.jpg')
-    bg_image_load = pygame.image.load('img/bg_2.jpg')
+    # winner_box = pygame.image.load('img/winner.jpg')
+    question_image_load=pygame.image.load('./img/box_question.png')
+    bg_image_load = pygame.image.load('img/bg_ttt_active.jpg')
     bg_image_menu_load = pygame.image.load('img/bg_ttt_menu.jpg')
     def __init__(self) -> None:
         # Screen settings
         self.ventana_width = 1200
         self.ventana_height = 800
-        self.bg_imagen=pygame.transform.scale(self.bg_image_menu_load,(self.ventana_width,self.ventana_height))
+        self.bg_imagen=pygame.transform.scale(self.bg_image_load,(self.ventana_width,self.ventana_height))
         self.bg_menu = pygame.transform.scale(self.bg_image_menu_load,(self.ventana_width,self.ventana_height))
+        self.question_bx= pygame.transform.scale(self.question_image_load,(600,280))
         self.bg_color=(255,255,255)
         
         # Caracteristicas Tablero
