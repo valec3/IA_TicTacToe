@@ -1,7 +1,6 @@
 import pygame
 
 class Configuraciones:
-    # winner_box = pygame.image.load('img/winner.jpg')
     question_image_load=pygame.image.load('./img/box_question.png')
     bg_image_load = pygame.image.load('img/bg_ttt_active.jpg')
     bg_image_menu_load = pygame.image.load('img/bg_ttt_menu.jpg')
@@ -37,3 +36,4 @@ class Configuraciones:
         self.cross_w = 25
 
 config = Configuraciones()
+
